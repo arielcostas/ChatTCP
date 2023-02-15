@@ -88,6 +88,8 @@ public class Gestor {
 			throw new RuntimeException(e);
 		}
 		this.mensajes.forEach(pw::println);
+		pw.println("===== BIENVENIDO AL CHAT =====");
+		pw.flush();
 	}
 
 	public boolean hayPosicionesDisponibles() {

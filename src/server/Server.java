@@ -14,6 +14,7 @@ public class Server {
 		var conexiones = new Gestor(MAXIMO_CONEXIONES);
 
 		var conectorTcp = new Thread(() -> {
+			System.out.println("Escuchando TCP en " + host.getHostAddress() + ":" + PUERTO_CHAT);
 			try (ServerSocket ss = ssf.createServerSocket(PUERTO_CHAT, 0, host)) {
 				while (!ss.isClosed() && conexiones.hayPosicionesDisponibles()) {
 					var sock = ss.accept();
@@ -29,6 +30,7 @@ public class Server {
 		});
 
 		var anuncioUdp = new Thread(() -> {
+			System.out.println("Escuchando UDP en " + host.getHostAddress() + ":" + 42069);
 			try (DatagramSocket s = new DatagramSocket(42069)) {
 				while (true) {
 					byte[] bufrec = new byte[1024];
@@ -51,7 +53,7 @@ public class Server {
 			}
 		});
 
-		conectorTcp.start();
 		anuncioUdp.start();
+		conectorTcp.start();
 	}
 }

@@ -16,8 +16,11 @@ public class Cliente {
 	public void start() {
 		var partes = obtenerConexion().split("--", 2);
 
-		try (var socket = new Socket(partes[0], Integer.parseInt(partes[1]))) {
+		try {
+			//noinspection resource
+			var socket = new Socket(partes[0], Integer.parseInt(partes[1]));
 			System.out.println("Conectando a " + socket.getRemoteSocketAddress());
+
 			// Flujos de cliente
 			var cw = System.out;
 			var cr = new Scanner(System.in);
