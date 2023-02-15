@@ -27,11 +27,10 @@ public class Conexion implements Runnable {
 		this.gestor.enviarMensajesHastaAhora(socket);
 		System.out.println("Escuchando " + this.id);
 
-		BufferedReader br;
 		try {
-			br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			var fecha = new SimpleDateFormat("hh:mm:ss");
-			while(true) {
+			while(!socket.isClosed()) {
 				var linea = br.readLine().trim();
 				if (linea.equals("*")) {
 					gestor.desconectar(this.id);

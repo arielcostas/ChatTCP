@@ -2,25 +2,56 @@ package server;
 
 import javax.net.ServerSocketFactory;
 import java.io.IOException;
+import java.net.*;
 
 public class Server {
-	public static void main(String[] args) {
+	public static final int PUERTO_CHAT = 9999;
+	public static final int MAXIMO_CONEXIONES = 100;
+
+	public static void main(String[] args) throws UnknownHostException {
+		var host = InetAddress.getLocalHost();
 		var ssf = ServerSocketFactory.getDefault();
-		var MAXIMO_CONEXIONES = 100;
 		var conexiones = new Gestor(MAXIMO_CONEXIONES);
 
-		try(var ss = ssf.createServerSocket(9999)) {
-			while(!ss.isClosed() && conexiones.hayPosicionesDisponibles()) {
-				var sock = ss.accept();
-				var conexion = conexiones.conectar(sock);
-				System.out.println("Conectado " + conexion.getId());
-				new Thread(conexion).start();
+		var conectorTcp = new Thread(() -> {
+			try (ServerSocket ss = ssf.createServerSocket(PUERTO_CHAT, 0, host)) {
+				while (!ss.isClosed() && conexiones.hayPosicionesDisponibles()) {
+					var sock = ss.accept();
+					var conexion = conexiones.conectar(sock);
+					System.out.println("Conectado " + conexion.getId());
+					new Thread(conexion).start();
+				}
+			} catch (IOException e) {
+				System.out.println("Excepción creando socket de servidor " + e.getMessage());
+			} catch (DemasiadosClientesException e) {
+				System.out.println("Se rechazó la conexión de un cliente porque hay demasiados conectados.");
 			}
-		} catch (IOException e) {
-			System.out.println("Excepción creando socket de servidor " + e.getMessage());
-		} catch (DemasiadosClientesException e) {
-			System.out.println("Se rechazó la conexión de un cliente porque hay demasiados conectados.");
-		}
+		});
 
+		var anuncioUdp = new Thread(() -> {
+			try (DatagramSocket s = new DatagramSocket(42069)) {
+				while (true) {
+					byte[] bufrec = new byte[1024];
+					DatagramPacket recibido = new DatagramPacket(bufrec, bufrec.length);
+					s.receive(recibido);
+
+					var mensaje = new String(recibido.getData());
+					mensaje = mensaje.substring(0, recibido.getLength());
+					System.out.println("<< UDP <<: " + mensaje);
+
+					var strenv = host.getHostAddress() + "--" + PUERTO_CHAT;
+					var bufenv = strenv.getBytes();
+
+					System.out.println(">> UDP >> " + strenv);
+					DatagramPacket respuesta = new DatagramPacket(bufenv, bufenv.length, recibido.getAddress(), recibido.getPort());
+					s.send(respuesta);
+				}
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		});
+
+		conectorTcp.start();
+		anuncioUdp.start();
 	}
 }
