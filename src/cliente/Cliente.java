@@ -69,7 +69,13 @@ public class Cliente {
 					'H', 'O', 'L', 'A'
 			};
 
-			var mensaje = new DatagramPacket(bufenv, bufenv.length, InetAddress.getLocalHost(), 42069);
+			var mensaje = new DatagramPacket(
+					bufenv,
+					bufenv.length,
+					InetAddress.getByName("255.255.255.255"),
+					42069
+			);
+
 			sock.send(mensaje);
 
 			// Recibir mensaje de vuelta

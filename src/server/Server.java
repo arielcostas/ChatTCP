@@ -9,7 +9,7 @@ public class Server {
 	public static final int MAXIMO_CONEXIONES = 100;
 
 	public static void main(String[] args) throws UnknownHostException {
-		var host = InetAddress.getLocalHost();
+		var host = InetAddress.getByName("0.0.0.0");
 		var ssf = ServerSocketFactory.getDefault();
 		var conexiones = new Gestor(MAXIMO_CONEXIONES);
 
@@ -41,7 +41,7 @@ public class Server {
 					mensaje = mensaje.substring(0, recibido.getLength());
 					System.out.println("<< UDP <<: " + mensaje);
 
-					var strenv = host.getHostAddress() + "--" + PUERTO_CHAT;
+					var strenv = InetAddress.getLocalHost().getHostAddress() + "--" + PUERTO_CHAT;
 					var bufenv = strenv.getBytes();
 
 					System.out.println(">> UDP >> " + strenv);
